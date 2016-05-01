@@ -86,16 +86,26 @@ def game_over(State):
     #game_over : State -> Boolean
     #game_over(S) is true if and only if the game is over in state S
     return tie_game(State)
-"""
-def won_horizontally():
-    return 0
 
-def won_vertically():
-    return 0
+def won_game(S):
+    wins = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ]
+    for w in wins:
+        if (len(set(w) & set(S['X'])) == 3):
+            print("Player X has Won!")
+            return ["Player X has Won!",320,150,20]
+        elif (len(set(w) & set(S['O'])) == 3):
+            print("Player O has Won!")
+            return ["Player O has Won!",320,50,20]
 
-def won_diagonally():
-    return 0
-"""
 def tie_game(State):
     return len(State['X'] + State['O']) == 9
 
@@ -124,6 +134,7 @@ def successor_state(S, P):
     else:
         CELL = player
     print(S)
+    won_game(S)
     return S #Returns successor state of game after event happens
 
 def already_played(cell, S):
