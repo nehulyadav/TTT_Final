@@ -4,6 +4,8 @@ TWO_PLAYER = 0
 EASY = 1
 MEDIUM = 2
 HARD = 3
+CLICK_NUM = 0
+playingGame = True
 
 def game_title():
     return "Tic Tac Toe"
@@ -12,7 +14,7 @@ def initial_state():
     return {"X":[], "O":[], "ai":TWO_PLAYER}
 
 def images(S):
-    return board() + difficulty_buttons() + draw_o(S) + draw_x(S)
+    return board() + difficulty_buttons() + draw_o(S) + draw_x(S) + won_game(S)
 
 def board():
     TOP_DIVIDER = (96, 288, 384, 288)
@@ -75,12 +77,22 @@ def draw_o(S):
     return draw
 
 def difficulty_buttons():
-    #X=490
-    #X2=630
-    EASY_BUTTON = (0,0,0,0,GREEN)
-    MEDIUM_BUTTON = (0,0,0,0,BLUE)
-    HARD_BUTTON = (0,0,0,0,RED)
-    return [EASY_BUTTON, MEDIUM_BUTTON, HARD_BUTTON]
+    global CLICK_NUM
+    returnList = []
+    if CLICK_NUM < 1:
+        #Easy button
+        returnList.append((490,340,620,300,GREEN))
+        returnList.append(("Easy",555,320,12))
+        #Medium button
+        returnList.append((490,240,620,200,BLUE))
+        returnList.append(("Medium",555,220,12))
+        #Hard button
+        returnList.append((490,140,620,100,RED))
+        returnList.append(("Hard",555,120,12))
+        #Instructions
+        returnList.append(("A simple Tic Tac Toe game. To begin 2 player, simply start playing",320,460,10))
+        returnList.append(("otherwise select level of difficult on the left hand side.",320,440,10))
+    return returnList
 
 def game_over(State):
     #game_over : State -> Boolean
@@ -88,6 +100,8 @@ def game_over(State):
     return tie_game(State)
 
 def won_game(S):
+    global playingGame
+    winningPlayer = []
     wins = [
         [0, 1, 2],
         [3, 4, 5],
@@ -101,39 +115,55 @@ def won_game(S):
     for w in wins:
         if (len(set(w) & set(S['X'])) == 3):
             print("Player X has Won!")
-            return ["Player X has Won!",320,150,20]
+            winningPlayer.append(("Player X has Won!",320,50,20))
+            playingGame = False
         elif (len(set(w) & set(S['O'])) == 3):
             print("Player O has Won!")
-            return ["Player O has Won!",320,50,20]
+            winningPlayer.append(("Player O has Won!",320,50,20))
+            playingGame = False
+    return winningPlayer
 
 def tie_game(State):
     return len(State['X'] + State['O']) == 9
 
 def successor_state(S, P):
     #successor_state : State x Point -> State
-    #successor_state(S,P) returns the successor state of the game resulting
-    player = get_turn(S)
-    if in_cell_zero(P) and not already_played(0,S):
-        CELL = player.append(0)
-    elif in_cell_one(P) and not already_played(1,S):
-        CELL = player.append(1)
-    elif in_cell_two(P) and not already_played(2,S):
-        CELL = player.append(2)
-    elif in_cell_three(P) and not already_played(3,S):
-        CELL = player.append(3)
-    elif in_cell_four(P) and not already_played(4,S):
-        CELL = player.append(4)
-    elif in_cell_five(P) and not already_played(5,S):
-        CELL = player.append(5)
-    elif in_cell_six(P) and not already_played(6,S):
-        CELL = player.append(6)
-    elif in_cell_seven(P) and not already_played(7,S):
-        CELL = player.append(7)
-    elif in_cell_eight(P) and not already_played(8,S):
-        CELL = player.append(8)
-    else:
-        CELL = player
+    global playingGame
+    global CLICK_NUM
+    if(playingGame):
+        if CLICK_NUM < 1:
+            if in_easy_button(P):
+                S["ai"] = EASY
+                print("we got here")
+            if in_medium_button(P):
+                S["ai"] = MEDIUM
+            if in_hard_button(P):
+                S["ai"] = HARD
+        #successor_state(S,P) returns the successor state of the game resulting
+        player = get_turn(S)
+        if in_cell_zero(P) and not already_played(0,S):
+            CELL = player.append(0)
+        elif in_cell_one(P) and not already_played(1,S):
+            CELL = player.append(1)
+        elif in_cell_two(P) and not already_played(2,S):
+            CELL = player.append(2)
+        elif in_cell_three(P) and not already_played(3,S):
+            CELL = player.append(3)
+        elif in_cell_four(P) and not already_played(4,S):
+            CELL = player.append(4)
+        elif in_cell_five(P) and not already_played(5,S):
+            CELL = player.append(5)
+        elif in_cell_six(P) and not already_played(6,S):
+            CELL = player.append(6)
+        elif in_cell_seven(P) and not already_played(7,S):
+            CELL = player.append(7)
+        elif in_cell_eight(P) and not already_played(8,S):
+            CELL = player.append(8)
+        else:
+            CELL = player
+        CLICK_NUM += 1
     print(S)
+    print(CLICK_NUM)
     won_game(S)
     return S #Returns successor state of game after event happens
 
@@ -146,7 +176,18 @@ def get_turn(S):
     else:
         return S['X']
 
-#TODO -- Fix code change <= to <
+def in_easy_button(P):
+    (X,Y) = P
+    return 490 < X < 620 and 300 < Y < 340
+
+def in_medium_button(P):
+    (X,Y) = P
+    return 490 < X < 620 and 200 < Y < 240
+
+def in_hard_button(P):
+    (X,Y) = P
+    return 490 < X < 620 and 100 < Y < 140
+
 def in_cell_zero(P):
     (X,Y) = P
     return 96 < X < 192 and 288 < Y < 384
